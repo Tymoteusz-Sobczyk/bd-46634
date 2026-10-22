@@ -81,7 +81,10 @@ HAVING COUNT(z.id) < (
     ) 
 ); 
 
+
 -- 14.
-SELECT p.id, p.nazwa COUNT(pz.produkt_id) FROM produkty 
+SELECT p.id, p.nazwa, COUNT(pz.produkt_id) AS liczba_wystapien FROM produkty p
 LEFT JOIN pozycje_zamowien pz ON pz.produkt_id=p.id 
 GROUP BY p.id, p.nazwa
+ORDER BY liczba_wystapien DESC
+LIMIT 3;
