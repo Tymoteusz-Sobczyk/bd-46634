@@ -1,9 +1,3 @@
-<style>
-    *{font-size: 18px;}
-    b{color: #9f2c2c;}
-    span{font-weight: bold;}
-    aside{font-size: 15px;}
-</style>
 Przejście do 3 postaci nomalnej eliminuje anomalie opisane w 
 <a href="https://github.com/kamilpiech97/cwup-resources/blob/main/INF/2026-2027/s3/bd/lab05.md#anomalie">lab05.md</a>.
  Uzasadnienie poszczególnych anomalii:
