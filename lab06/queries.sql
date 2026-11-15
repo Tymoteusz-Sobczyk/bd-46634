@@ -8,7 +8,8 @@ UPDATE produkty SET ilosc_magazyn = ilosc_magazyn + 50 WHERE kategoria_id = 5;
 -- 2.
 DELETE FROM pozycje_zamowien pz
 USING zamowienia z 
-WHERE pz.ilosc = 1 AND z.data_zamowienia < CURRENT_DATE - INTERVAL '180 days';
+WHERE pz.zamowienie_id = z.id
+AND pz.ilosc = 1 AND z.data_zamowienia < CURRENT_DATE - INTERVAL '180 days';
 -- Wynik zapytania:
 -- DELETE 0
 
@@ -88,4 +89,38 @@ WHERE status = 'nowe' AND data_zamowienia < CURRENT_DATE - INTERVAL '7 days';
 
 -- 7.
 -- Usuwanie historii sprzedaży moim zdaniem NIGDY nie jest dobrym pomysłem, sprzedanego produktu nie wyczarujemy spowrotem
--- i musiałoby coś generować koszmar w inwentaryzacji produktów
+-- a takie pozbywanie się historii sprzedaży musi generować koszmar w inwentaryzacji produktów
+
+DELETE FROM pozycje_zamowien pz
+USING produkty p 
+WHERE pz.produkt_id = p.id
+AND ilosc_magazyn < 5
+
+-- 8.
+-- a)
+BEGIN;
+
+INSERT INTO zamowienia(klient_id, pracownik_id) VALUES 
+(10, 5);
+
+INSERT INTO pozycje_zamowien(zamowienie_id, produkt_id, ilosc, cena_jednostkowa) VALUES
+((SELECT id FROM zamowienia ORDER BY id DESC LIMIT 1), 5, 3, 23.89),
+((SELECT id FROM zamowienia ORDER BY id DESC LIMIT 1), 13, 1, 320);
+
+COMMIT;
+
+-- b)
+BEGIN;
+
+INSERT INTO zamowienia(klient_id, pracownik_id) VALUES 
+(10, 5);
+
+INSERT INTO pozycje_zamowien(zamowienie_id, produkt_id, ilosc, cena_jednostkowa) VALUES
+((SELECT id FROM zamowienia ORDER BY id DESC LIMIT 1), 5, 3, 23.89),
+((SELECT id FROM zamowienia ORDER BY id DESC LIMIT 1), 167, 1, 320);
+
+ROLLBACK;
+
+-- W przypadku zatwierdzenia transakcji poleceniem COMMIT;, zmiany zostają zatwierdzone i dane dodane do bazy danych
+-- w przypadku błędu powodowanego naruszeniem FOREIGN KEY, wywołanie zapytania ROLLBACK, żadne zmiany nie trafiają do bazy, i jesteśmy uchronieni przed
+-- nie pełnymi danymi (fałszywymi dodatkowo, ponieważ w razie takiego błędu nigdy nie dojdzie do sfinalizowania takiego zamówienia)
